@@ -7,31 +7,42 @@ echo   SuperLive Outreach Bot - Local Runner
 echo ============================================
 echo.
 
-:: ── Step 1: Ensure pnpm is available ──────────────────────────
+:: ── Load .env file if it exists ───────────────────────────────
+if exist ".env" (
+    echo Loading .env file...
+    for /f "usebackq tokens=1,* delims==" %%A in (".env") do (
+        if not "%%A"=="" if not "%%A:~0,1%"=="#" (
+            set "%%A=%%B"
+        )
+    )
+)
+
+:: ── Check pnpm ─────────────────────────────────────────────────
 where pnpm >nul 2>&1
 if errorlevel 1 (
-    echo [ERROR] pnpm not found. Install it first:
+    echo [ERROR] pnpm not found. Install it with:
     echo   npm install -g pnpm
     echo.
     pause
     exit /b 1
 )
 
-:: ── Step 2: Ask for DATABASE_URL if not already set ───────────
+:: ── Check DATABASE_URL ─────────────────────────────────────────
 if "%DATABASE_URL%"=="" (
-    echo No DATABASE_URL found in environment.
+    echo [ERROR] DATABASE_URL not set.
     echo.
-    set /p DATABASE_URL="Enter your PostgreSQL connection string: "
+    echo Create a file called .env in this folder with:
+    echo   DATABASE_URL=postgresql://postgres:PASSWORD@db.xxxx.supabase.co:5432/postgres
     echo.
-)
-
-if "%DATABASE_URL%"=="" (
-    echo [ERROR] DATABASE_URL is required to run the app.
+    echo See .env.example for a template.
     pause
     exit /b 1
 )
 
-:: ── Step 3: Install dependencies ──────────────────────────────
+echo DATABASE_URL loaded OK.
+echo.
+
+:: ── Install dependencies ───────────────────────────────────────
 if not exist "node_modules" (
     echo [1/3] Installing dependencies ^(first run only^)...
     call pnpm install
@@ -44,33 +55,24 @@ if not exist "node_modules" (
     echo [1/3] Dependencies already installed.
 )
 
-:: ── Step 4: Push DB schema ─────────────────────────────────────
+:: ── Push DB schema ─────────────────────────────────────────────
 echo [2/3] Pushing database schema...
 call pnpm --filter @workspace/db run push
 if errorlevel 1 (
-    echo [WARNING] DB schema push failed - check your DATABASE_URL.
-    echo           The app may still work if tables already exist.
+    echo [WARNING] DB push had issues - tables may already exist, continuing...
 )
 
-:: ── Step 5: Start both servers ─────────────────────────────────
+:: ── Start servers ──────────────────────────────────────────────
 echo [3/3] Starting servers...
 echo.
 
-start "API Server ^(port 5000^)" cmd /k "set DATABASE_URL=%DATABASE_URL% && echo Starting API server... && pnpm --filter @workspace/api-server run dev"
-
+start "API Server (port 5000)" cmd /k "set DATABASE_URL=%DATABASE_URL% && pnpm --filter @workspace/api-server run dev"
 timeout /t 2 /nobreak >nul
-
-start "Frontend ^(port 3000^)" cmd /k "echo Starting frontend... && pnpm --filter @workspace/app run dev"
+start "Frontend (port 3000)" cmd /k "pnpm --filter @workspace/app run dev"
 
 echo.
 echo ============================================
-echo   App is starting up!
-echo.
-echo   Frontend : http://localhost:3000
-echo   API      : http://localhost:5000/api/healthz
+echo   Open in browser: http://localhost:3000
 echo ============================================
-echo.
-echo Two terminal windows have opened.
-echo Close them to stop the servers.
 echo.
 pause
