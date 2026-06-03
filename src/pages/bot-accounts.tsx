@@ -193,7 +193,7 @@ export default function BotAccounts() {
   const { data: accounts, isLoading } = useQuery<BotAccount[]>({
     queryKey: ["bot-accounts", platformFilter],
     queryFn: async () => {
-      const res = await fetch("/api/bot-accounts");
+      const res = await fetch(`/api/bot-accounts${platformFilter !== 'all' ? `?platform=${platformFilter}` : ''}`);
       if (!res.ok) throw new Error("Failed to fetch bot accounts");
       return res.json();
     },
