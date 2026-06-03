@@ -11,5 +11,9 @@
   "devDependencies": {
     "@types/pg": "^8.11.14",
     "drizzle-kit": "^0.31.4"
+  },
+  "scripts": {
+    "push": "drizzle-kit push",
+    "generate": "drizzle-kit generate"
   }
 }
