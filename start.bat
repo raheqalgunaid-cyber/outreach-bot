@@ -7,15 +7,28 @@ echo   SuperLive Outreach Bot - Local Runner
 echo ============================================
 echo.
 
-:: ── Load .env file if it exists ───────────────────────────────
+:: ── Load DATABASE_URL from .env file ──────────────────────────
 if exist ".env" (
     echo Loading .env file...
-    for /f "usebackq tokens=1,* delims==" %%A in (".env") do (
-        if not "%%A"=="" if not "%%A:~0,1%"=="#" (
-            set "%%A=%%B"
-        )
+    for /f "tokens=1,* delims==" %%A in (.env) do (
+        if /i "%%A"=="DATABASE_URL" set "DATABASE_URL=%%B"
     )
 )
+
+:: ── Check DATABASE_URL ─────────────────────────────────────────
+if not defined DATABASE_URL (
+    echo [ERROR] DATABASE_URL not found.
+    echo.
+    echo Make sure your .env file is in the same folder as start.bat
+    echo and contains a line like:
+    echo   DATABASE_URL=postgresql://postgres:PASSWORD@host:5432/postgres
+    echo.
+    pause
+    exit /b 1
+)
+
+echo DATABASE_URL loaded OK.
+echo.
 
 :: ── Check pnpm ─────────────────────────────────────────────────
 where pnpm >nul 2>&1
@@ -26,21 +39,6 @@ if errorlevel 1 (
     pause
     exit /b 1
 )
-
-:: ── Check DATABASE_URL ─────────────────────────────────────────
-if "%DATABASE_URL%"=="" (
-    echo [ERROR] DATABASE_URL not set.
-    echo.
-    echo Create a file called .env in this folder with:
-    echo   DATABASE_URL=postgresql://postgres:PASSWORD@db.xxxx.supabase.co:5432/postgres
-    echo.
-    echo See .env.example for a template.
-    pause
-    exit /b 1
-)
-
-echo DATABASE_URL loaded OK.
-echo.
 
 :: ── Install dependencies ───────────────────────────────────────
 if not exist "node_modules" (
