@@ -7,6 +7,10 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: { "@": path.resolve(__dirname, "../../src") },
+    modules: [
+      path.resolve(__dirname, "node_modules"),
+      "node_modules",
+    ],
   },
   server: {
     proxy: {
