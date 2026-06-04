@@ -43,8 +43,7 @@ if errorlevel 1 (
 :: Install dependencies
 if not exist "node_modules" (
     echo [1/3] Installing dependencies ^(first run only^)...
-    call pnpm approve-builds --all
-    call pnpm install
+    call pnpm install --no-frozen-lockfile
     if errorlevel 1 (
         echo [ERROR] pnpm install failed.
         pause
