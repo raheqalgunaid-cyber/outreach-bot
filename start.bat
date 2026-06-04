@@ -1,78 +1,48 @@
 @echo off
-title SuperLive Outreach Bot - Launcher
-color 0A
+title SuperLive Outreach Bot
 
-echo ============================================
-echo   SuperLive Outreach Bot - Local Runner
-echo ============================================
-echo.
-
-:: ── Load .env file if it exists ───────────────────────────────
-if exist ".env" (
-    echo Loading .env file...
-    for /f "usebackq tokens=1,* delims==" %%A in (".env") do (
-        if not "%%A"=="" if not "%%A:~0,1%"=="#" (
-            set "%%A=%%B"
-        )
-    )
-)
-
-:: ── Check pnpm ─────────────────────────────────────────────────
-where pnpm >nul 2>&1
-if errorlevel 1 (
-    echo [ERROR] pnpm not found. Install it with:
-    echo   npm install -g pnpm
-    echo.
-    pause
-    exit /b 1
-)
-
-:: ── Check DATABASE_URL ─────────────────────────────────────────
+:: Check for DATABASE_URL
 if "%DATABASE_URL%"=="" (
-    echo [ERROR] DATABASE_URL not set.
-    echo.
-    echo Create a file called .env in this folder with:
-    echo   DATABASE_URL=postgresql://postgres:PASSWORD@db.xxxx.supabase.co:5432/postgres
-    echo.
-    echo See .env.example for a template.
+    echo ERROR: DATABASE_URL environment variable is not set.
+    echo Set it before running this script:
+    echo   set DATABASE_URL=postgres://user:password@localhost:5432/outreach_bot
     pause
     exit /b 1
 )
 
-echo DATABASE_URL loaded OK.
-echo.
-
-:: ── Install dependencies ───────────────────────────────────────
+:: Install dependencies if node_modules is missing
 if not exist "node_modules" (
-    echo [1/3] Installing dependencies ^(first run only^)...
+    echo Installing dependencies...
     call pnpm install
     if errorlevel 1 (
-        echo [ERROR] pnpm install failed.
+        echo ERROR: pnpm install failed. Make sure pnpm is installed: npm i -g pnpm
         pause
         exit /b 1
     )
-) else (
-    echo [1/3] Dependencies already installed.
 )
 
-:: ── Push DB schema ─────────────────────────────────────────────
-echo [2/3] Pushing database schema...
+:: Push DB schema
+echo Pushing database schema...
 call pnpm --filter @workspace/db run push
 if errorlevel 1 (
-    echo [WARNING] DB push had issues - tables may already exist, continuing...
+    echo WARNING: DB schema push failed. Check your DATABASE_URL.
 )
 
-:: ── Start servers ──────────────────────────────────────────────
-echo [3/3] Starting servers...
-echo.
+:: Start backend in a new window
+echo Starting API server on port 5000...
+start "API Server" cmd /k "pnpm --filter @workspace/api-server run dev"
 
-start "API Server (port 5000)" cmd /k "set DATABASE_URL=%DATABASE_URL% && pnpm --filter @workspace/api-server run dev"
+:: Wait a moment for the backend to initialize
 timeout /t 2 /nobreak >nul
-start "Frontend (port 3000)" cmd /k "pnpm --filter @workspace/app run dev"
+
+:: Start frontend in a new window
+echo Starting frontend on port 3000...
+start "Frontend" cmd /k "pnpm --filter @workspace/app run dev"
 
 echo.
-echo ============================================
-echo   Open in browser: http://localhost:3000
-echo ============================================
+echo Both servers are starting:
+echo   Frontend : http://localhost:3000
+echo   API      : http://localhost:5000
 echo.
+echo Close the two terminal windows to stop the servers.
 pause
