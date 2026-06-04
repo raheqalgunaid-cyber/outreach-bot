@@ -7,7 +7,7 @@ echo   SuperLive Outreach Bot - Local Runner
 echo ============================================
 echo.
 
-:: ── Load DATABASE_URL from .env file ──────────────────────────
+:: Load DATABASE_URL from .env file
 if exist ".env" (
     echo Loading .env file...
     for /f "tokens=1,* delims==" %%A in (.env) do (
@@ -15,7 +15,7 @@ if exist ".env" (
     )
 )
 
-:: ── Check DATABASE_URL ─────────────────────────────────────────
+:: Check DATABASE_URL
 if not defined DATABASE_URL (
     echo [ERROR] DATABASE_URL not found.
     echo.
@@ -30,7 +30,7 @@ if not defined DATABASE_URL (
 echo DATABASE_URL loaded OK.
 echo.
 
-:: ── Check pnpm ─────────────────────────────────────────────────
+:: Check pnpm
 where pnpm >nul 2>&1
 if errorlevel 1 (
     echo [ERROR] pnpm not found. Install it with:
@@ -40,7 +40,7 @@ if errorlevel 1 (
     exit /b 1
 )
 
-:: ── Install dependencies ───────────────────────────────────────
+:: Install dependencies
 if not exist "node_modules" (
     echo [1/3] Installing dependencies ^(first run only^)...
     call pnpm install
@@ -53,14 +53,14 @@ if not exist "node_modules" (
     echo [1/3] Dependencies already installed.
 )
 
-:: ── Push DB schema ─────────────────────────────────────────────
+:: Push DB schema
 echo [2/3] Pushing database schema...
 call pnpm --filter @workspace/db run push
 if errorlevel 1 (
     echo [WARNING] DB push had issues - tables may already exist, continuing...
 )
 
-:: ── Start servers ──────────────────────────────────────────────
+:: Start servers
 echo [3/3] Starting servers...
 echo.
 
