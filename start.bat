@@ -40,27 +40,34 @@ if errorlevel 1 (
     exit /b 1
 )
 
-:: Approve build scripts (pnpm blocks them by default)
-call pnpm approve-builds --all >nul 2>&1
-
 :: Install dependencies
 if not exist "node_modules" (
     echo [1/3] Installing dependencies ^(first run only^)...
     call pnpm install --no-frozen-lockfile
     if errorlevel 1 (
-        echo [ERROR] pnpm install failed.
-        pause
-        exit /b 1
+        echo Approving build scripts and retrying...
+        call pnpm approve-builds --all
+        call pnpm install --no-frozen-lockfile
+        if errorlevel 1 (
+            echo [ERROR] pnpm install failed.
+            pause
+            exit /b 1
+        )
     )
 ) else (
     echo [1/3] Dependencies already installed.
+    call pnpm approve-builds --all >nul 2>&1
 )
 
 :: Push DB schema
 echo [2/3] Pushing database schema...
 call pnpm --filter @workspace/db run push
 if errorlevel 1 (
-    echo [WARNING] DB push had issues - tables may already exist, continuing...
+    call pnpm approve-builds --all >nul 2>&1
+    call pnpm --filter @workspace/db run push
+    if errorlevel 1 (
+        echo [WARNING] DB push had issues - tables may already exist, continuing...
+    )
 )
 
 :: Start servers
