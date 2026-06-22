@@ -246,6 +246,11 @@ paths:
           required: false
           schema:
             type: string
+        - name: region
+          in: query
+          required: false
+          schema:
+            type: string
       responses:
         "200":
           description: List of streamers
@@ -332,6 +337,9 @@ components:
           type: ["integer", "null"]
         category:
           type: ["string", "null"]
+        region:
+          type: ["string", "null"]
+          description: "Target region, e.g. MENA | US | EU | GLOBAL"
         messagesPerHour:
           type: integer
         totalMessagesSent:
@@ -362,6 +370,9 @@ components:
           type: ["integer", "null"]
         category:
           type: ["string", "null"]
+        region:
+          type: ["string", "null"]
+          description: "Target region, e.g. MENA | US | EU | GLOBAL"
         messagesPerHour:
           type: integer
         credentials:
@@ -383,6 +394,8 @@ components:
         maxViewers:
           type: ["integer", "null"]
         category:
+          type: ["string", "null"]
+        region:
           type: ["string", "null"]
         messagesPerHour:
           type: integer
@@ -447,6 +460,9 @@ components:
           type: ["string", "null"]
         profileUrl:
           type: ["string", "null"]
+        region:
+          type: ["string", "null"]
+          description: "Region, e.g. MENA | US | EU | GLOBAL"
         status:
           type: string
           description: "pending | contacted | responded | joined | ignored"

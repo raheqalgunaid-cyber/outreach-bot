@@ -1,25 +1,20 @@
 {
-  "name": "@workspace/api-server",
+  "name": "@workspace/automation-worker",
   "version": "0.0.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
-    "build": "node build.mjs",
+    "dev": "tsx src/index.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@workspace/db": "workspace:*",
     "@workspace/crypto": "workspace:*",
-    "cors": "^2.8.5",
-    "express": "^5.1.0",
-    "zod": "catalog:"
+    "drizzle-orm": "catalog:",
+    "puppeteer": "^23.11.1"
   },
   "devDependencies": {
-    "@types/cors": "^2.8.17",
-    "@types/express": "^5.0.3",
     "@types/node": "catalog:",
-    "esbuild": "catalog:",
     "tsx": "catalog:",
     "typescript": "catalog:"
   }

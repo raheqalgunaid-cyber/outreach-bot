@@ -1,8 +1,15 @@
 import { Router } from "express";
 import { db, bot_accounts } from "@workspace/db";
+import { encryptSecret } from "@workspace/crypto";
 import { eq } from "drizzle-orm";
 
 const router = Router();
+
+// Never send password ciphertext to clients — the worker process reads it directly from the DB.
+function omitPassword<T extends { passwordEncrypted: string }>(row: T) {
+  const { passwordEncrypted, ...rest } = row;
+  return rest;
+}
 
 router.get("/", async (req, res) => {
   try {
@@ -12,7 +19,7 @@ router.get("/", async (req, res) => {
       .from(bot_accounts)
       .where(platform ? eq(bot_accounts.platform, platform) : undefined)
       .orderBy(bot_accounts.createdAt);
-    res.json(rows);
+    res.json(rows.map(omitPassword));
   } catch (err) {
     res.status(500).json({ error: String(err) });
   }
@@ -20,8 +27,15 @@ router.get("/", async (req, res) => {
 
 router.post("/", async (req, res) => {
   try {
-    const [row] = await db.insert(bot_accounts).values(req.body).returning();
-    res.status(201).json(row);
+    const { password, ...rest } = req.body as { password: string } & Record<string, unknown>;
+    if (!password) {
+      return res.status(400).json({ error: "password is required" });
+    }
+    const [row] = await db
+      .insert(bot_accounts)
+      .values({ ...rest, passwordEncrypted: encryptSecret(password) })
+      .returning();
+    res.status(201).json(omitPassword(row));
   } catch (err) {
     res.status(500).json({ error: String(err) });
   }
