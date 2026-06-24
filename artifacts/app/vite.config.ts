@@ -20,7 +20,7 @@ export default defineConfig({
       "/api": "http://localhost:5000",
     },
     fs: {
-      allow: [path.resolve(__dirname, "../.."), path.resolve(__dirname, "node_modules")],
+      allow: [path.resolve(__dirname, "../"), path.resolve(__dirname, "node_modules")],
     },
   },
 });
