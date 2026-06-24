@@ -6,10 +6,11 @@ const router = Router();
 
 router.get("/", async (req, res) => {
   try {
-    const { platform, status } = req.query as Record<string, string>;
+    const { platform, status, region } = req.query as Record<string, string>;
     const conditions = [];
     if (platform) conditions.push(eq(streamers.platform, platform));
     if (status) conditions.push(eq(streamers.status, status));
+    if (region) conditions.push(eq(streamers.region, region));
     const rows = await db
       .select()
       .from(streamers)
