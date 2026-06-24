@@ -6,7 +6,10 @@ import path from "path";
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
-    alias: { "@": path.resolve(__dirname, "../../src") },
+    alias: {
+      "@": path.resolve(__dirname, "../../src"),
+      "@workspace/api-client-react": path.resolve(__dirname, "../../lib/api-client-react/src"),
+    },
     moduleDirectories: [
       "node_modules",
       path.resolve(__dirname, "node_modules"),
@@ -17,7 +20,7 @@ export default defineConfig({
       "/api": "http://localhost:5000",
     },
     fs: {
-      allow: [path.resolve(__dirname, "../.."), path.resolve(__dirname, "node_modules")],
+      allow: [path.resolve(__dirname, "../"), path.resolve(__dirname, "node_modules")],
     },
   },
 });
