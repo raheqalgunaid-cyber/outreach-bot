@@ -41,22 +41,23 @@ if errorlevel 1 (
 )
 
 :: Install dependencies
+:: If node_modules uses old pnpm virtual store (.pnpm folder), wipe and reinstall
+:: so the hoisted layout from .npmrc takes effect.
+if exist "node_modules\.pnpm" (
+    echo [1/3] Detected old package layout - reinstalling with hoisted mode...
+    rmdir /s /q node_modules
+)
 if not exist "node_modules" (
-    echo [1/3] Installing dependencies ^(first run only^)...
+    echo [1/3] Installing dependencies...
+    call pnpm approve-builds --all >nul 2>&1
     call pnpm install --no-frozen-lockfile
     if errorlevel 1 (
-        echo Approving build scripts and retrying...
-        call pnpm approve-builds --all
-        call pnpm install --no-frozen-lockfile
-        if errorlevel 1 (
-            echo [ERROR] pnpm install failed.
-            pause
-            exit /b 1
-        )
+        echo [ERROR] pnpm install failed.
+        pause
+        exit /b 1
     )
 ) else (
     echo [1/3] Dependencies already installed.
-    call pnpm approve-builds --all >nul 2>&1
 )
 
 :: Push DB schema
@@ -75,7 +76,7 @@ echo [3/3] Starting servers...
 echo.
 
 start "API Server (port 5000)" cmd /k "set DATABASE_URL=%DATABASE_URL% && pnpm --filter @workspace/api-server run dev"
-timeout /t 2 /nobreak >/dev/null
+timeout /t 2 /nobreak >nul
 start "Frontend (port 3000)" cmd /k "pnpm --filter @workspace/app run dev"
 
 echo.
