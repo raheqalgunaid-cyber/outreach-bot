@@ -75,7 +75,7 @@ echo [3/3] Starting servers...
 echo.
 
 start "API Server (port 5000)" cmd /k "set DATABASE_URL=%DATABASE_URL% && pnpm --filter @workspace/api-server run dev"
-timeout /t 2 /nobreak >nul
+timeout /t 2 /nobreak >/dev/null
 start "Frontend (port 3000)" cmd /k "pnpm --filter @workspace/app run dev"
 
 echo.
