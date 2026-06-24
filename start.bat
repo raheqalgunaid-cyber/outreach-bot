@@ -49,7 +49,6 @@ if exist "node_modules\.pnpm" (
 )
 if not exist "node_modules" (
     echo [1/3] Installing dependencies...
-    call pnpm approve-builds --all >nul 2>&1
     call pnpm install --no-frozen-lockfile
     if errorlevel 1 (
         echo [ERROR] pnpm install failed.
@@ -64,11 +63,7 @@ if not exist "node_modules" (
 echo [2/3] Pushing database schema...
 call pnpm --filter @workspace/db run push
 if errorlevel 1 (
-    call pnpm approve-builds --all >nul 2>&1
-    call pnpm --filter @workspace/db run push
-    if errorlevel 1 (
-        echo [WARNING] DB push had issues - tables may already exist, continuing...
-    )
+    echo [WARNING] DB push had issues - tables may already exist, continuing...
 )
 
 :: Start servers
