@@ -40,16 +40,16 @@ if errorlevel 1 (
     exit /b 1
 )
 
-:: Install dependencies
-:: If node_modules uses old pnpm virtual store (.pnpm folder), wipe and reinstall
-:: so the hoisted layout from .npmrc takes effect.
+:: Wipe old virtual-store layout so hoisted mode takes effect
 if exist "node_modules\.pnpm" (
-    echo [1/3] Detected old package layout - reinstalling with hoisted mode...
+    echo [1/3] Detected old package layout - reinstalling...
     rmdir /s /q node_modules
 )
+
+:: Install dependencies
 if not exist "node_modules" (
     echo [1/3] Installing dependencies...
-    call pnpm install --no-frozen-lockfile
+    call pnpm install --no-frozen-lockfile --config.dangerously-allow-all-builds=true
     if errorlevel 1 (
         echo [ERROR] pnpm install failed.
         pause
